@@ -10,12 +10,12 @@ yzcaipiao::yzcaipiao()
     cout << "初始化彩票程序中..." << endl;
     _mydb_.EstablishTable();
     _mydb_.SearchData();
+
 }
 
 yzcaipiao::~yzcaipiao()
 {
     cout << "退出彩票程序中..." << endl;
-
 }
 
 /**
