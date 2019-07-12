@@ -7,11 +7,14 @@ using namespace std;
 
 yzcaipiao::yzcaipiao()
 {
-    cout << "初始化彩票程序中..."<<endl;
+    cout << "初始化彩票程序中..." << endl;
+    _mydb_.EstablishTable();
+    _mydb_.SearchData();
 }
 
 yzcaipiao::~yzcaipiao()
 {
+    cout << "退出彩票程序中..." << endl;
 
 }
 
@@ -24,12 +27,21 @@ void yzcaipiao::init(){
 
     memset(username,0,sizeof(username));
     memset(passwd,0,sizeof(passwd));
+
+    //可以考虑放进数据库中，增删改查
+    /*
     _map_.insert(pair<string,string>("pioneer","123456"));
     _map_.insert(pair<string,string>("yanzhen","111111"));
     _map_.insert(pair<string,string>("viki","222222"));
     _map_.insert(pair<string,string>("root","123456"));
     _map_.insert(pair<string,string>("admin","123456"));
     _map_.insert(pair<string,string>("zzz","111111"));
+    _map_.insert(pair<string,string>("zyq","123456"));
+    */
+    for(int i = 0; i<_mydb_.count;i++)
+    {
+        _map_.insert(pair<string,string>(_mydb_.m_user[i].UserName,_mydb_.m_user[i].PassWd));
+    }
 }
 
 /**
@@ -114,7 +126,7 @@ int yzcaipiao::deChong(int num[],int n){
  * @param :num[] --数组
  *         n     --大小
  */
-void yzcaipiao::judge(int num[],int n)
+void yzcaipiao::judge(int num[],int n,LotteryType type)
 {
     int oddNum = 0;     //奇数
     int evenNum = 0;    //偶数
@@ -127,6 +139,13 @@ void yzcaipiao::judge(int num[],int n)
     int middleNum = 0;  //2-22
     int bigNum = 0;     //3-33
     int sum = 0;        //红球和值
+
+    int range1 = 0;
+    int range2 = 0;
+    int range3 = 0;
+    int range4 = 0;
+    int range5 = 0;
+
 
     for(int i = 0; i < n; ++i){
 
@@ -145,20 +164,47 @@ void yzcaipiao::judge(int num[],int n)
         }else if(num[i]%3 ==2){
             num2++;
         }
-
         //统计小中大号
         if(num[i]>=1 && num[i]<=11){
             smallNum++;
         }
-        if(num[i]>=12 && num[i]<=22){
+        else if(num[i]>=12 && num[i]<=22){
             middleNum++;
         }
-        if(num[i]>=23 && num[i]<=33){
+        else if(num[i]>=23 && num[i]<=33){
             bigNum++;
         }
+
+        //统计五区
+        if(num[i]>=1 && num[i]<=7){
+            range1++;
+        }
+        else if(num[i]>=8 && num[i]<=14){
+            range2++;
+        }
+        else if(num[i]>=15 && num[i]<=21){
+            range3++;
+        }
+        else if(num[i]>=22 && num[i]<=28){
+            range4++;
+        }
+        else if(num[i]>=29 && num[i]<=35){
+            range5++;
+        }
+
         sum += num[i];
     }
-    printf(" %d:%d  %d:%d:%d  %d:%d:%d   %d\n\n",oddNum,evenNum,num0,num1,num2,smallNum,middleNum,bigNum,sum);
+    switch(type)
+    {
+    case ssq:
+        printf(" %d:%d  %d:%d:%d  %d:%d:%d   %d\n\n",oddNum,evenNum,num0,num1,num2,smallNum,middleNum,bigNum,sum);
+        break;
+    case dlt:
+        printf(" %d:%d   %d:%d:%d  %d:%d:%d:%d:%d   %d\n\n",oddNum,evenNum,num0,num1,num2,range1,range2,range3,range4,range5,sum);
+        break;
+    default:
+        break;
+    }
 }
 
 /**
@@ -188,7 +234,7 @@ void yzcaipiao::shuangSeQiu(){
         }
         printf("%04d",j+1);
         displaySSQ(redNum,6,blueNum);
-        judge(redNum,6);
+        judge(redNum,6,ssq);
     }
 
 }
@@ -205,7 +251,7 @@ void yzcaipiao::daLeTou(){
     int input=0;
     printf("请输入随机注数:");
     scanf("%d",&input);
-    cout <<endl<< "序号             选号              奇偶  012路  小中大  红和值"<<endl<<endl;
+    cout <<endl<< "序号             选号              奇偶  012路  五区比      红和值"<<endl<<endl;
     for(int j = 0; j < input; ++j){
         for(int i = 0; i < 5; ++i)
         {
@@ -231,7 +277,7 @@ void yzcaipiao::daLeTou(){
 
         printf("%04d",j+1);
         displayDLT(redNum,5,blueNum,2);
-        judge(redNum,5);
+        judge(redNum,5,dlt);
     }
 
 
@@ -255,14 +301,9 @@ void yzcaipiao::displayTitle(){
     cout << endl;
 }
 
-/**
- * @func  :登录认证
- * @author:pioneeryz
- * @date  :2019/7/10
- */
- void yzcaipiao::loginIn(){
-    int count = 0;
+int yzcaipiao::userOn(){
     bool flag = false;
+    int count = 0;
     while(1){
         cout << "请输入用户名:";
         cin >> username;
@@ -279,15 +320,93 @@ void yzcaipiao::displayTitle(){
         if(flag){
             cout << endl;
             cout << username <<"登录成功,开始你的旅行！" << endl;
-            break;
+            return 0;
         }else{
             cout << "您输入的用户名或密码错误!" << endl;
             count ++;
             if(count >= 3){
                 cout << "连续三次输入错误,即将退出程序！" << endl;
                 exit(0);
+                return -1;
             }
             continue;
+        }
+    }
+}
+
+int  yzcaipiao::addUser(){
+    string name = "";
+    string pass = "";
+    cout << "请输入增加的用户名:";
+    cin >> name;
+    cout << endl;
+    cout << "请输入用户名的密码:";
+    cin >> pass;
+    cout << endl;
+    int ret_val = _mydb_.InsretData(name,pass);
+    if(!ret_val){
+        _map_.clear();
+        _mydb_.SearchData();
+        for(int i = 0; i<_mydb_.count;i++)
+        {
+            _map_.insert(pair<string,string>(_mydb_.m_user[i].UserName,_mydb_.m_user[i].PassWd));
+        }
+    }
+    return ret_val;
+}
+
+int  yzcaipiao::deleteUser()
+{
+    int ret_val = -1;
+    string name ="";
+    string pass ="";
+    cout << "请输入要删除的用户的名字:";
+    cin >> name;
+    cout << "请输入管理员密码:";
+    cin >> pass;
+    if(pass == "038813"){
+        ret_val = _mydb_.DeleteData(name);
+        if(!ret_val){
+            _map_.clear();
+            _mydb_.SearchData();
+            for(int i = 0; i<_mydb_.count;i++)
+            {
+                _map_.insert(pair<string,string>(_mydb_.m_user[i].UserName,_mydb_.m_user[i].PassWd));
+            }
+        }
+    }else{
+        cout << "管理员密码错误，无法删除该用户"<<endl;
+    }
+    return ret_val;
+}
+
+/**
+ * @func  :登录认证
+ * @author:pioneeryz
+ * @date  :2019/7/10
+ */
+ void yzcaipiao::loginIn(){
+    int ret_val = -1;
+    int count = 0;
+    bool flag = false;
+    int input;
+    while(1){
+        cout << "请选择要执行的操作(提示:(1.用户登录 2.增加用户 3.删除用户)"<<endl;
+        cin >> input;
+        switch(input){
+        case 1:
+            ret_val=userOn();
+            if(ret_val == 0)
+                return;
+            break;
+        case 2:
+            addUser();
+            break;
+        case 3:
+            deleteUser();
+            break;
+        default:
+            break;
         }
     }
  }

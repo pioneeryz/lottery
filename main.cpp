@@ -11,11 +11,11 @@ using namespace std;
 int main()
 {
     yzcaipiao yz;
-    srand(time(NULL));
     int caipiao_type_=0;
     yz.init();
     loop:yz.loginIn();
     while(1){
+        srand(time(NULL));
         yz.displayTitle();
         cout << "请选择玩法(提示:1(双色球玩法),2(大乐透玩法),3(退出当前用户),4(结束程序):" << endl;
         scanf("%d",&caipiao_type_);
