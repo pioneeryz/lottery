@@ -1,0 +1,2 @@
+# lottery
+simulating the lottery.
