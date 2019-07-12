@@ -7,11 +7,12 @@ using namespace std;
 
 yzcaipiao::yzcaipiao()
 {
-    cout << "初始化彩票程序中..."<<endl;
+    cout << "初始化彩票程序中..." << endl;
 }
 
 yzcaipiao::~yzcaipiao()
 {
+    cout << "即将退出彩票程序..." << endl;
 
 }
 
