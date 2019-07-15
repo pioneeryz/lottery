@@ -30,17 +30,17 @@ int mydb::QuerySQL(string DbName,string sql)
       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
       return -1;
    }else{
-      fprintf(stderr, "Opened database successfully\n");
+      //fprintf(stderr, "Opened database successfully\n");
    }
    rc=sqlite3_get_table(db,sql.c_str(),&dbResult, &nRow, &nColumn, &errmsg);
    if(rc==0){
         index=nColumn;
-        printf("查询到%d条记录\n",nRow);
+        //printf("查询到%d条记录\n",nRow);
         count=nRow;
         for(int i=0;i<nRow;i++){
-            printf("第%d条记录\n",i+1);
+            //printf("第%d条记录\n",i+1);
             for(int j=0;j<nColumn;j++){
-                printf("%s = %s\n",dbResult[j],dbResult[index]);
+                //printf("%s = %s\n",dbResult[j],dbResult[index]);
                 if(j==0){
                     m_user[i].UserName=dbResult[index];
                 }
@@ -49,7 +49,7 @@ int mydb::QuerySQL(string DbName,string sql)
                 }
                 ++index;
             }
-            printf("----------\n");
+            //printf("----------\n");
         }
    }else{
        printf("查询失败...\n");
@@ -89,7 +89,7 @@ int mydb::ExcuteSQL(string DbName,string sql)
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
    }else{
-      fprintf(stdout, "SQL successfully\n");
+      //fprintf(stdout, "SQL successfully\n");
    }
    sqlite3_close(db);
    return 0;
@@ -102,12 +102,36 @@ int mydb::ExcuteSQL(string DbName,string sql)
  * @param :Dbname --数据库名字
  *         sql    --要执行的sql语句
  */
-int mydb::EstablishTable()
+int mydb::EstablishTable(TableType tt)
 {
     string sql = "";
-    sql = "CREATE TABLE user("  \
+    switch(tt){
+    case userTable:
+        sql = "CREATE TABLE user("  \
           "UserName  TEXT   NOT NULL," \
           "PassWd    TEXT   NOT NULL);";
+          break;
+    case ssqTable:
+          sql = "CREATE TABLE ssq("  \
+          "SEQ_NUMBER  TEXT   NOT NULL," \
+          "BLUE  TEXT   NOT NULL," \
+          "ODD_EVEN  TEXT   NOT NULL," \
+          "M_012  TEXT   NOT NULL," \
+          "M_ABC  TEXT   NOT NULL," \
+          "RED_SUM   INT   NOT NULL);";
+          break;
+    case dltTable:
+          sql = "CREATE TABLE dlt("  \
+          "SEQ_NUMBER  TEXT   NOT NULL," \
+          "BLUE  TEXT   NOT NULL," \
+          "ODD_EVEN  TEXT   NOT NULL," \
+          "M_012  TEXT   NOT NULL," \
+          "M_12345 TEXT   NOT NULL," \
+          "RED_SUM   INT   NOT NULL);";
+          break;
+    default:
+        break;
+    }
     ExcuteSQL(_dbname_,sql);
     return 0;
 }
@@ -125,10 +149,43 @@ int mydb::InsretData(string username, string password)
     string sql = "INSERT INTO user(UserName,PassWd) " \
                  "VALUES (\'%s'\,\'%s\');";
     sprintf(sql_tmp,sql.c_str(),username.c_str(),password.c_str());
-    cout<<"sql_tmp:"<<sql_tmp<<endl;
+    //cout<<"sql_tmp:"<<sql_tmp<<endl;
     sql=string(sql_tmp);
     int ret_val = ExcuteSQL(_dbname_,sql);
     return ret_val;
+}
+
+/**
+ * @func  :插入数据
+ * @author:pioneeryz
+ * @date  :2019/7/10
+ * @param :Dbname --数据库名字
+ *         sql    --要执行的sql语句
+ */
+int mydb::InsertSSQData(string red, string blue,string oddeven, string m012, string mabc, int redsum)
+{
+    char sql_tmp[1024]={0};
+    string sql = "INSERT INTO ssq(SEQ_NUMBER,BLUE,ODD_EVEN,M_012,M_ABC,RED_SUM) " \
+                 "VALUES (\'%s'\,\'%s\',\'%s\',\'%s\',\'%s\',\'%d\');";
+    sprintf(sql_tmp,sql.c_str(),red.c_str(),blue.c_str(),oddeven.c_str(),m012.c_str(),mabc.c_str(),redsum);
+    //cout<<"sql_tmp:"<<sql_tmp<<endl;
+    sql=string(sql_tmp);
+    int ret_val = ExcuteSQL(_dbname_,sql);
+    return ret_val;
+
+}
+int mydb::InsertDLTData(string red,string blue, string oddeven, string m012, string m12345, int redsum)
+{
+    char sql_tmp[1024]={0};
+    string sql = "INSERT INTO dlt(SEQ_NUMBER,BLUE,ODD_EVEN,M_012,M_12345,RED_SUM) " \
+                 "VALUES (\'%s'\,\'%s\',\'%s\',\'%s\',\'%s\',\'%d\');";
+    sprintf(sql_tmp,sql.c_str(),red.c_str(),blue.c_str(),oddeven.c_str(),m012.c_str(),m12345.c_str(),redsum);
+    //cout<<"sql_tmp:"<<sql_tmp<<endl;
+    sql=string(sql_tmp);
+    int ret_val = ExcuteSQL(_dbname_,sql);
+    return ret_val;
+
+
 }
 
 /**

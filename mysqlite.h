@@ -10,6 +10,13 @@ typedef struct{
     string UserName;
     string PassWd;
 }user;
+
+typedef enum{
+    userTable=0,
+    ssqTable,
+    dltTable
+}TableType;
+
 class mydb{
 
 public:
@@ -21,7 +28,7 @@ public:
     //执行SQL语句
     int ExcuteSQL(string DbName,string sql);
     //建表
-    int EstablishTable();
+    int EstablishTable(TableType tt);
     //插入数据
     int InsretData(string username, string password);
     //查询
@@ -30,6 +37,9 @@ public:
     int DeleteData(string username);
     //删除表
     int DeleteTable();
+public:
+    int InsertSSQData(string red,string blue, string oddeven, string m012, string mabc, int redsum);
+    int InsertDLTData(string red,string blue, string oddeven, string m012, string m12345, int redsum);
 public:
     user m_user[100];
     string _dbname_;

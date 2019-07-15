@@ -2,20 +2,25 @@
 #include <iostream>
 #include <time.h>
 #include <string.h>
+#include <pthread.h>
+#include <windows.h>
 using namespace std;
 
 
 yzcaipiao::yzcaipiao()
 {
     cout << "初始化彩票程序中..." << endl;
-    _mydb_.EstablishTable();
+    _mydb_.EstablishTable(userTable);
+    _mydb_.EstablishTable(ssqTable);
+    _mydb_.EstablishTable(dltTable);
     _mydb_.SearchData();
-
+    pthread_mutex_init(&dblock, NULL);
 }
 
 yzcaipiao::~yzcaipiao()
 {
     cout << "退出彩票程序中..." << endl;
+    pthread_mutex_destroy(&dblock);
 }
 
 /**
@@ -76,10 +81,17 @@ void yzcaipiao::paixu(int num[],int n)
  *         n     --大小
  */
 void yzcaipiao::displaySSQ(int num[],int n,int blue){
+    char redtemp[32] = {0};
+    char bluetemp[8] = {0};
     for(int k=0;k<n;++k){
         printf(" %02d ",num[k]);
 	}
 	printf("(%02d)   ",blue);
+	sprintf(redtemp,"%02d %02d %02d %02d %02d %02d",num[0],num[1],num[2],num[3],num[4],num[5]);
+	seqNumber = string(redtemp);
+    sprintf(bluetemp,"%02d",blue);
+    blueNumber = string(bluetemp);
+	//cout <<"seqNumber :"<<seqNumber<<endl;
 }
 
 /**
@@ -92,6 +104,8 @@ void yzcaipiao::displaySSQ(int num[],int n,int blue){
  *         m     --大小
  */
 void yzcaipiao::displayDLT(int red[], int n, int blue[], int m){
+    char redtemp[32] = {0};
+    char bluetemp[8] = {0};
     for(int k = 0; k < n; ++k){
         printf(" %02d ", red[k]);
 	}
@@ -101,6 +115,10 @@ void yzcaipiao::displayDLT(int red[], int n, int blue[], int m){
         printf(" %02d ",blue[l]);
 	}
 	cout<<")";
+    sprintf(redtemp,"%02d %02d %02d %02d %02d",red[0],red[1],red[2],red[3],red[4]);
+	seqNumber = string(redtemp);
+    sprintf(bluetemp,"%02d %02d",blue[0],blue[1]);
+    blueNumber = string(bluetemp);
 }
 
 /**
@@ -146,6 +164,11 @@ void yzcaipiao::judge(int num[],int n,LotteryType type)
     int range4 = 0;
     int range5 = 0;
 
+    char oddEven_temp[32] = {0};
+    char m_012_temp[32] = {0};
+    char m_abc_temp[32] = {0};
+    char m_12345_temp[32] = {0};
+    char redSum_temp[16] = {0};
 
     for(int i = 0; i < n; ++i){
 
@@ -194,13 +217,22 @@ void yzcaipiao::judge(int num[],int n,LotteryType type)
 
         sum += num[i];
     }
+    sprintf(oddEven_temp,"%d:%d",oddNum,evenNum);
+    sprintf(m_012_temp,"%d:%d:%d",num0,num1,num2);
+    redSum = sum;
+    oddEven = string(oddEven_temp);
+    m_012 = string(m_012_temp);
     switch(type)
     {
     case ssq:
         printf(" %d:%d  %d:%d:%d  %d:%d:%d   %d\n\n",oddNum,evenNum,num0,num1,num2,smallNum,middleNum,bigNum,sum);
+        sprintf(m_abc_temp,"%d:%d:%d",smallNum,middleNum,bigNum);
+        m_abc = string(m_abc_temp);
         break;
     case dlt:
         printf(" %d:%d   %d:%d:%d  %d:%d:%d:%d:%d   %d\n\n",oddNum,evenNum,num0,num1,num2,range1,range2,range3,range4,range5,sum);
+        sprintf(m_12345_temp,"%d:%d:%d:%d:%d",range1,range2,range3,range4,range5);
+        m_12345 = string(m_12345_temp);
         break;
     default:
         break;
@@ -221,6 +253,7 @@ void yzcaipiao::shuangSeQiu(){
     scanf("%d",&input);
     cout <<endl<< "序号             选号              奇偶  012路  小中大  红和值"<<endl<<endl;
     for(int j = 0; j < input; ++j){
+        //pthread_mutex_lock(&dblock);
         for(int i = 0; i < 6; ++i)
         {
             redNum[i] = rand()%33+1;
@@ -235,8 +268,11 @@ void yzcaipiao::shuangSeQiu(){
         printf("%04d",j+1);
         displaySSQ(redNum,6,blueNum);
         judge(redNum,6,ssq);
-    }
+        _mydb_.InsertSSQData(seqNumber,blueNumber,oddEven,m_012,m_abc,redSum);
 
+        Sleep(300);//200ms
+        //pthread_mutex_unlock(&dblock);
+    }
 }
 
 /**
@@ -278,6 +314,8 @@ void yzcaipiao::daLeTou(){
         printf("%04d",j+1);
         displayDLT(redNum,5,blueNum,2);
         judge(redNum,5,dlt);
+        _mydb_.InsertDLTData(seqNumber,blueNumber,oddEven,m_012,m_12345,redSum);
+        Sleep(500);
     }
 
 
@@ -335,8 +373,14 @@ int yzcaipiao::userOn(){
 }
 
 int  yzcaipiao::addUser(){
+    string adminPass = "";
     string name = "";
     string pass = "";
+    cout << "请输入管理员密码执行操作:";
+    cin >> adminPass;
+    if(adminPass != "038813"){
+        return -1;
+    }
     cout << "请输入增加的用户名:";
     cin >> name;
     cout << endl;

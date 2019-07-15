@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include "mysqlite.h"
+#include <pthread.h>
 using namespace std;
 
 typedef enum{
@@ -53,6 +54,24 @@ private:
     char username[32];
     char passwd[32];
     mydb _mydb_;
+    //数据库锁
+    pthread_mutex_t dblock;
+
+private:
+    //选号(红球)
+    string seqNumber;
+    string blueNumber;
+    //奇偶比
+    string oddEven;
+    //012路比
+    string m_012;
+    //小中大
+    string m_abc;
+    //五区比
+    string m_12345;
+    //红和值
+    int redSum;
+
 
 };
 
