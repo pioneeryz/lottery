@@ -1,10 +1,16 @@
 #include "mysqlite.h"
-
+#include <time.h>
+#include <string.h>
+//构造函数
 mydb::mydb()
 {
     _dbname_ = "caipiao.db";
+    memset(currentData,0,sizeof(currentData));
+    getCurrentDate(currentData);
     count = 0;
 }
+
+//析构函数
 mydb::~mydb()
 {
 
@@ -105,29 +111,36 @@ int mydb::ExcuteSQL(string DbName,string sql)
 int mydb::EstablishTable(TableType tt)
 {
     string sql = "";
+    char sql_tmp[1024]={0};
     switch(tt){
-    case userTable:
+    case 0:
         sql = "CREATE TABLE user("  \
-          "UserName  TEXT   NOT NULL," \
-          "PassWd    TEXT   NOT NULL);";
+              "UserName  TEXT   NOT NULL," \
+              "PassWd    TEXT   NOT NULL);";
           break;
-    case ssqTable:
-          sql = "CREATE TABLE ssq("  \
-          "SEQ_NUMBER  TEXT   NOT NULL," \
-          "BLUE  TEXT   NOT NULL," \
-          "ODD_EVEN  TEXT   NOT NULL," \
-          "M_012  TEXT   NOT NULL," \
-          "M_ABC  TEXT   NOT NULL," \
-          "RED_SUM   INT   NOT NULL);";
+    case 1:
+
+        sql = "CREATE TABLE ssq%s("  \
+              "SEQ_NUMBER  TEXT   NOT NULL," \
+              "BLUE  TEXT   NOT NULL," \
+              "ODD_EVEN  TEXT   NOT NULL," \
+              "M_012  TEXT   NOT NULL," \
+              "M_ABC  TEXT   NOT NULL," \
+              "RED_SUM   INT   NOT NULL);";
+          sprintf(sql_tmp,sql.c_str(),currentData);
+          sql = string(sql_tmp);
           break;
-    case dltTable:
-          sql = "CREATE TABLE dlt("  \
-          "SEQ_NUMBER  TEXT   NOT NULL," \
-          "BLUE  TEXT   NOT NULL," \
-          "ODD_EVEN  TEXT   NOT NULL," \
-          "M_012  TEXT   NOT NULL," \
-          "M_12345 TEXT   NOT NULL," \
-          "RED_SUM   INT   NOT NULL);";
+
+    case 2:
+          sql = "CREATE TABLE dlt%s("  \
+                "SEQ_NUMBER  TEXT   NOT NULL," \
+                "BLUE  TEXT   NOT NULL," \
+                "ODD_EVEN  TEXT   NOT NULL," \
+                "M_012  TEXT   NOT NULL," \
+                "M_12345 TEXT   NOT NULL," \
+                "RED_SUM   INT   NOT NULL);";
+          sprintf(sql_tmp,sql.c_str(),currentData);
+          sql = string(sql_tmp);
           break;
     default:
         break;
@@ -147,7 +160,7 @@ int mydb::InsretData(string username, string password)
 {
     char sql_tmp[1024]={0};
     string sql = "INSERT INTO user(UserName,PassWd) " \
-                 "VALUES (\'%s'\,\'%s\');";
+                 "VALUES ('%s','%s');";
     sprintf(sql_tmp,sql.c_str(),username.c_str(),password.c_str());
     //cout<<"sql_tmp:"<<sql_tmp<<endl;
     sql=string(sql_tmp);
@@ -159,33 +172,47 @@ int mydb::InsretData(string username, string password)
  * @func  :插入数据
  * @author:pioneeryz
  * @date  :2019/7/10
- * @param :Dbname --数据库名字
- *         sql    --要执行的sql语句
+ * @param :red     --红球
+ *         blue    --篮球
+ *         oddeven --奇偶比
+ *         m012    --012路
+ *         mabc    --小中大
+ *         redsum  --红球和
  */
 int mydb::InsertSSQData(string red, string blue,string oddeven, string m012, string mabc, int redsum)
 {
     char sql_tmp[1024]={0};
-    string sql = "INSERT INTO ssq(SEQ_NUMBER,BLUE,ODD_EVEN,M_012,M_ABC,RED_SUM) " \
-                 "VALUES (\'%s'\,\'%s\',\'%s\',\'%s\',\'%s\',\'%d\');";
-    sprintf(sql_tmp,sql.c_str(),red.c_str(),blue.c_str(),oddeven.c_str(),m012.c_str(),mabc.c_str(),redsum);
+    string sql = "INSERT INTO ssq%s(SEQ_NUMBER,BLUE,ODD_EVEN,M_012,M_ABC,RED_SUM) " \
+                 "VALUES ('%s','%s','%s','%s','%s','%d');";
+    sprintf(sql_tmp,sql.c_str(),currentData,red.c_str(),blue.c_str(),oddeven.c_str(),m012.c_str(),mabc.c_str(),redsum);
     //cout<<"sql_tmp:"<<sql_tmp<<endl;
     sql=string(sql_tmp);
     int ret_val = ExcuteSQL(_dbname_,sql);
     return ret_val;
 
 }
+
+/**
+ * @func  :插入数据
+ * @author:pioneeryz
+ * @date  :2019/7/10
+ * @param :red     --红球
+ *         blue    --篮球
+ *         oddeven --奇偶比
+ *         m012    --012路
+ *         m12345  --12345区
+ *         redsum  --红球和
+ */
 int mydb::InsertDLTData(string red,string blue, string oddeven, string m012, string m12345, int redsum)
 {
     char sql_tmp[1024]={0};
-    string sql = "INSERT INTO dlt(SEQ_NUMBER,BLUE,ODD_EVEN,M_012,M_12345,RED_SUM) " \
-                 "VALUES (\'%s'\,\'%s\',\'%s\',\'%s\',\'%s\',\'%d\');";
-    sprintf(sql_tmp,sql.c_str(),red.c_str(),blue.c_str(),oddeven.c_str(),m012.c_str(),m12345.c_str(),redsum);
+    string sql = "INSERT INTO dlt%s(SEQ_NUMBER,BLUE,ODD_EVEN,M_012,M_12345,RED_SUM) " \
+                 "VALUES ('%s','%s','%s','%s','%s','%d');";
+    sprintf(sql_tmp,sql.c_str(),currentData,red.c_str(),blue.c_str(),oddeven.c_str(),m012.c_str(),m12345.c_str(),redsum);
     //cout<<"sql_tmp:"<<sql_tmp<<endl;
     sql=string(sql_tmp);
     int ret_val = ExcuteSQL(_dbname_,sql);
     return ret_val;
-
-
 }
 
 /**
@@ -231,4 +258,16 @@ int mydb::DeleteTable()
 {
 
 
+}
+
+/**
+ * @func  :获取当前格式化日期
+ * @author:pioneeryz
+ * @date  :2019/7/11
+ */
+int mydb::getCurrentDate(char* timeStr){
+    time_t times = time(NULL);
+    struct tm* utcTime = gmtime(&times);
+    int timeStrLen = sprintf(timeStr, "%04d%02d%02d", utcTime->tm_year+1900, utcTime->tm_mon+1, utcTime->tm_mday);
+    return timeStrLen;
 }

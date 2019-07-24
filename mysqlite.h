@@ -6,6 +6,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 using namespace std;
+
 typedef struct{
     string UserName;
     string PassWd;
@@ -37,13 +38,22 @@ public:
     int DeleteData(string username);
     //删除表
     int DeleteTable();
+    //获取当前日期
+    int getCurrentDate(char* timeStr);
+
 public:
+    //将双色球数据插入数据库
     int InsertSSQData(string red,string blue, string oddeven, string m012, string mabc, int redsum);
+    //将大乐透数据插入数据库
     int InsertDLTData(string red,string blue, string oddeven, string m012, string m12345, int redsum);
 public:
     user m_user[100];
     string _dbname_;
     int count;
+
+    char ssqTable[32];
+    char dltTable[32];
+    char currentData[32];
 };
 
 

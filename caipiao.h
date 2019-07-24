@@ -60,6 +60,7 @@ private:
 private:
     //选号(红球)
     string seqNumber;
+    //篮球
     string blueNumber;
     //奇偶比
     string oddEven;
@@ -72,7 +73,7 @@ private:
     //红和值
     int redSum;
 
-
+    char constNumber[128];
 };
 
 #endif // CAIPIAO_H_INCLUDED

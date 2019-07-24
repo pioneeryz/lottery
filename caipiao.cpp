@@ -32,7 +32,10 @@ void yzcaipiao::init(){
 
     memset(username,0,sizeof(username));
     memset(passwd,0,sizeof(passwd));
-
+    memset(constNumber,0,sizeof(constNumber));
+    for(int j = 0; j < 105; ++j){
+        constNumber[j] = j;
+    }
     //可以考虑放进数据库中，增删改查
     /*
     _map_.insert(pair<string,string>("pioneer","123456"));
@@ -249,14 +252,22 @@ void yzcaipiao::shuangSeQiu(){
     int blueNum = 0;
     int ret_val=-1;
     int input=0;
+    int m_random = 0;
     printf("请输入随机注数:");
     scanf("%d",&input);
     cout <<endl<< "序号             选号              奇偶  012路  小中大  红和值"<<endl<<endl;
     for(int j = 0; j < input; ++j){
         //pthread_mutex_lock(&dblock);
+        /*1.直接随机数赋值
         for(int i = 0; i < 6; ++i)
         {
             redNum[i] = rand()%33+1;
+        }
+        */
+        for(int i = 0; i < 6; ++i)
+        {
+            m_random = rand()%98;
+            redNum[i] = constNumber[m_random]%33 + 1;
         }
         blueNum = rand()%16 + 1;
         paixu(redNum,6);
@@ -270,7 +281,7 @@ void yzcaipiao::shuangSeQiu(){
         judge(redNum,6,ssq);
         _mydb_.InsertSSQData(seqNumber,blueNumber,oddEven,m_012,m_abc,redSum);
 
-        Sleep(300);//200ms
+        Sleep(10);//200ms
         //pthread_mutex_unlock(&dblock);
     }
 }
@@ -283,17 +294,24 @@ void yzcaipiao::shuangSeQiu(){
 void yzcaipiao::daLeTou(){
     int redNum[32] = {0};
     int blueNum[4] = {0};
-    int ret_val=-1;
-    int input=0;
+    int ret_val = -1;
+    int input = 0;
+    int m_random = 0;
     printf("请输入随机注数:");
     scanf("%d",&input);
     cout <<endl<< "序号             选号              奇偶  012路  五区比      红和值"<<endl<<endl;
     for(int j = 0; j < input; ++j){
+        /*
         for(int i = 0; i < 5; ++i)
         {
             redNum[i] = rand()%35+1;
         }
-
+        */
+        for(int i = 0; i < 5; ++i)
+        {
+            m_random = rand()%104;
+            redNum[i] = constNumber[m_random]%35 + 1;
+        }
         paixu(redNum,5);
         ret_val = deChong(redNum,6);
         if(ret_val != 0){
@@ -315,7 +333,7 @@ void yzcaipiao::daLeTou(){
         displayDLT(redNum,5,blueNum,2);
         judge(redNum,5,dlt);
         _mydb_.InsertDLTData(seqNumber,blueNumber,oddEven,m_012,m_12345,redSum);
-        Sleep(500);
+        Sleep(10);
     }
 
 
