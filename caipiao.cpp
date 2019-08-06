@@ -14,13 +14,13 @@ yzcaipiao::yzcaipiao()
     _mydb_.EstablishTable(ssqTable);
     _mydb_.EstablishTable(dltTable);
     _mydb_.SearchData();
-    pthread_mutex_init(&dblock, NULL);
+    //pthread_mutex_init(&dblock, NULL);
 }
 
 yzcaipiao::~yzcaipiao()
 {
     cout << "退出彩票程序中..." << endl;
-    pthread_mutex_destroy(&dblock);
+    //pthread_mutex_destroy(&dblock);
 }
 
 /**
@@ -333,11 +333,10 @@ void yzcaipiao::daLeTou(){
         displayDLT(redNum,5,blueNum,2);
         judge(redNum,5,dlt);
         _mydb_.InsertDLTData(seqNumber,blueNumber,oddEven,m_012,m_12345,redSum);
-        Sleep(10);
+        //Sleep(1);
     }
-
-
 }
+
 
 /**
  * @func  :标题头打印
@@ -405,6 +404,15 @@ int  yzcaipiao::addUser(){
     cout << "请输入用户名的密码:";
     cin >> pass;
     cout << endl;
+
+    map<string,string>::iterator it;
+
+    for(it = _map_.begin(); it != _map_.end(); it++){
+        if(string(name) == it->first){
+            cout << "该用户已经存在." << endl;
+            return -1;
+        }
+    }
     int ret_val = _mydb_.InsretData(name,pass);
     if(!ret_val){
         _map_.clear();
@@ -445,6 +453,28 @@ int  yzcaipiao::deleteUser()
 /**
  * @func  :登录认证
  * @author:pioneeryz
+ * @date  :2019/8/2
+ */
+int  yzcaipiao::queryUser(){
+    string pass ="";
+    cout << "请输入管理员密码:";
+    cin >> pass;
+    if(pass != "038813"){
+        cout << "密码错误."<<endl;
+        return -1;
+    }
+    cout << "----------------"<<endl;
+
+    for(int i = 0; i < 100; i++){
+        if(string(_mydb_.m_user[i].UserName) != "")
+        cout << _mydb_.m_user[i].UserName << ":"<<_mydb_.m_user[i].PassWd<<endl;
+    }
+    cout << "----------------"<<endl;
+    return 0;
+}
+/**
+ * @func  :登录认证
+ * @author:pioneeryz
  * @date  :2019/7/10
  */
  void yzcaipiao::loginIn(){
@@ -453,7 +483,7 @@ int  yzcaipiao::deleteUser()
     bool flag = false;
     int input;
     while(1){
-        cout << "请选择要执行的操作(提示:(1.用户登录 2.增加用户 3.删除用户)"<<endl;
+        cout << "请选择要执行的操作(提示:(1.用户登录 2.增加用户 3.删除用户 4.查询当前用户)"<<endl;
         cin >> input;
         switch(input){
         case 1:
@@ -467,6 +497,10 @@ int  yzcaipiao::deleteUser()
         case 3:
             deleteUser();
             break;
+        case 4:
+            queryUser();
+            break;
+
         default:
             break;
         }

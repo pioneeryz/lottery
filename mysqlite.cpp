@@ -1,6 +1,7 @@
 #include "mysqlite.h"
 #include <time.h>
 #include <string.h>
+
 //构造函数
 mydb::mydb()
 {
@@ -69,8 +70,8 @@ int mydb::QuerySQL(string DbName,string sql)
  * @func  :执行SQL语句
  * @author:pioneeryz
  * @date  :2019/7/10
- * @param :Dbname --数据库名字
- *         sql    --要执行的sql语句
+ * @param :Dbname -- 数据库名字
+ *         sql    -- 要执行的sql语句
  */
 int mydb::ExcuteSQL(string DbName,string sql)
 {
@@ -189,7 +190,6 @@ int mydb::InsertSSQData(string red, string blue,string oddeven, string m012, str
     sql=string(sql_tmp);
     int ret_val = ExcuteSQL(_dbname_,sql);
     return ret_val;
-
 }
 
 /**
@@ -254,10 +254,15 @@ int mydb::DeleteData(string username)
  * @param :Dbname --数据库名字
  *         sql    --要执行的sql语句
  */
-int mydb::DeleteTable()
+int mydb::DeleteTable(string table)
 {
-
-
+    char sql_tmp[1024]={0};
+    string sql = "DELETE TABLE %s";
+    sprintf(sql_tmp,sql.c_str(),table.c_str());
+    cout<<"sql_tmp:"<<sql_tmp<<endl;
+    sql=string(sql_tmp);
+    int ret_val = ExcuteSQL(_dbname_,sql);
+    return ret_val;
 }
 
 /**

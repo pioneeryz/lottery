@@ -37,7 +37,7 @@ public:
     //删除数据
     int DeleteData(string username);
     //删除表
-    int DeleteTable();
+    int DeleteTable(string table);
     //获取当前日期
     int getCurrentDate(char* timeStr);
 

@@ -44,6 +44,8 @@ public:
     int  addUser();
     //删除用户
     int  deleteUser();
+    //查询用户
+    int  queryUser();
     //初始登录界面
     void  loginIn();
     //退出
